@@ -5,12 +5,14 @@ import com.danielxavier.Pagamentos.model.Pagamento;
 import com.danielxavier.Pagamentos.model.Status;
 import com.danielxavier.Pagamentos.record.PagamentoRecord;
 import com.danielxavier.Pagamentos.repository.PagamentoRepository;
+import com.danielxavier.Pagamentos.http.PedidoClient;
 import jakarta.persistence.EntityNotFoundException;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class PagamentoService {
@@ -19,7 +21,7 @@ public class PagamentoService {
     private PagamentoRepository repository;
 
     @Autowired
-    private ModelMapper mapper;
+    private PedidoClient pedido;
 
     public Page<PagamentoRecord> obterTodos(Pageable paginacao) {
         return repository
@@ -49,5 +51,17 @@ public class PagamentoService {
 
     public void excluirPagamento(Long id){
         repository.deleteById(id);
+    }
+
+    public void confirmarPagamento(Long id){
+        Optional<Pagamento> pagamento = repository.findById(id);
+
+        if (!pagamento.isPresent()) {
+            throw new EntityNotFoundException();
+        }
+
+        pagamento.get().setStatus(Status.CONFIRMADO);
+        repository.save(pagamento.get());
+        pedido.atualizarPagamento(pagamento.get().getPedidoId());
     }
 }
