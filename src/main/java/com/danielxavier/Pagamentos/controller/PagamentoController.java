@@ -3,6 +3,7 @@ package com.danielxavier.Pagamentos.controller;
 import com.danielxavier.Pagamentos.model.Pagamento;
 import com.danielxavier.Pagamentos.record.PagamentoRecord;
 import com.danielxavier.Pagamentos.service.PagamentoService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +55,13 @@ public class PagamentoController {
     }
 
     @PatchMapping("/{id}/confirmar")
+    @CircuitBreaker(name = "atualizaPedido", fallbackMethod = "pagamentoAutorizadoComIntegracaoPendente")
     public void confirmarPagamento(@PathVariable @NotNull Long id){
         service.confirmarPagamento(id);
+    }
+
+    public void pagamentoAutorizadoComIntegracaoPendente(Long id, Exception e){
+        service.alteraStatus(id);
     }
 
 }
