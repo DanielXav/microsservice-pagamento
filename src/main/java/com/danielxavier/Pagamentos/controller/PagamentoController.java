@@ -1,6 +1,5 @@
 package com.danielxavier.Pagamentos.controller;
 
-import com.danielxavier.Pagamentos.model.Pagamento;
 import com.danielxavier.Pagamentos.record.PagamentoRecord;
 import com.danielxavier.Pagamentos.service.PagamentoService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -38,7 +37,6 @@ public class PagamentoController {
     public ResponseEntity<PagamentoRecord> cadastrar(@RequestBody @Valid PagamentoRecord record, UriComponentsBuilder uriBuilder) {
         PagamentoRecord pagamento = service.criarPagamento(record);
         URI endereco = uriBuilder.path("/pagamentos/{id}").buildAndExpand(pagamento.id()).toUri();
-
         return ResponseEntity.created(endereco).body(pagamento);
     }
 

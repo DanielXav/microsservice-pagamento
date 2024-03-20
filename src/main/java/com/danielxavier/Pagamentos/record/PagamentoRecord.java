@@ -1,8 +1,10 @@
 package com.danielxavier.Pagamentos.record;
 
+import com.danielxavier.Pagamentos.model.ItemDoPedido;
 import com.danielxavier.Pagamentos.model.Status;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record PagamentoRecord(
         Long id,
@@ -13,6 +15,7 @@ public record PagamentoRecord(
         String codigo,
         Status status,
         Long formaDePagamentoId,
-        Long pedidoId
+        Long pedidoId,
+        List<ItemDoPedido> itens
 ) {
 }

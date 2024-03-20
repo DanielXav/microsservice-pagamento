@@ -32,7 +32,24 @@ public class PagamentoService {
     public PagamentoRecord obterPorId(Long id) {
         Pagamento pagamento = repository.findById(id)
                 .orElseThrow(EntityNotFoundException::new);
-        return PagamentoMapper.INSTANCE.toDto(pagamento);
+        PagamentoRecord dto = PagamentoMapper.INSTANCE.toDto(pagamento);
+
+        var itens = pedido.obterItensDoPedido(pagamento.getPedidoId()).getItens();
+
+        PagamentoRecord dtoNovo = new PagamentoRecord(
+                dto.id(),
+                dto.valor(),
+                dto.nome(),
+                dto.numero(),
+                dto.expiracao(),
+                dto.codigo(),
+                dto.status(),
+                dto.formaDePagamentoId(),
+                dto.pedidoId(),
+                itens
+        );
+
+        return dtoNovo;
     }
 
     public PagamentoRecord criarPagamento(PagamentoRecord pagamentoRecord) {
