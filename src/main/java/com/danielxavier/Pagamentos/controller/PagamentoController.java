@@ -5,6 +5,8 @@ import com.danielxavier.Pagamentos.service.PagamentoService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,9 @@ public class PagamentoController {
     @Autowired
     private PagamentoService service;
 
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
     @GetMapping
     public Page<PagamentoRecord> listar(@PageableDefault(size = 10) Pageable paginacao){
         return service.obterTodos(paginacao);
@@ -37,6 +42,9 @@ public class PagamentoController {
     public ResponseEntity<PagamentoRecord> cadastrar(@RequestBody @Valid PagamentoRecord record, UriComponentsBuilder uriBuilder) {
         PagamentoRecord pagamento = service.criarPagamento(record);
         URI endereco = uriBuilder.path("/pagamentos/{id}").buildAndExpand(pagamento.id()).toUri();
+
+        Message message = new Message(("Pagamento criado com o id " + pagamento.id()).getBytes());
+        rabbitTemplate.send("pagamento.concluido", message);
         return ResponseEntity.created(endereco).body(pagamento);
     }
 
